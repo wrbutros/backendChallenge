@@ -62,12 +62,23 @@ const getNeighbors = (board: string[][], pos: { x: number; y: number }) => {
       if (pos.y + y < 0 || pos.y + y > board.length - 1) continue;
       const ly = pos.y + y;
 
-      if (!(x === 0 && y === 0)) {
+      if (!(x === 0 && y === 0) && getDisabledIdx({ x: lx, y: ly }) === -1) {
         neighbors.push({ c: board[lx][ly], x: lx, y: ly });
       }
     }
   }
   return neighbors;
+};
+
+// Already visited
+const disabledPositions = [];
+const getDisabledIdx = (pos: { x: number; y: number }) =>
+  this.disabledPositions.findIndex(d => d.x === pos.x && d.y === pos.y);
+
+// remove disabled
+const removeDisabled = (pos: { x: number; y: number }) => {
+  const idx = getDisabledIdx(pos);
+  if (idx !== -1) this.disabledPositions.splice(idx, 1);
 };
 
 // Find all the different coordinates related to a given char
@@ -89,6 +100,7 @@ const findPath = (
   word: string,
   pos: { x: number; y: number }
 ) => {
+  this.disabledPositions.push(pos);
   const neighbors = getNeighbors(board, pos);
   const coincidences = neighbors.filter(n => n.c === word[1]);
   let exist = false;
@@ -107,6 +119,7 @@ const existWord = (
   pos?: { x: number; y: number }
 ) => {
   if (word.length === 1) {
+    this.disabledPositions = [];
     return true;
   }
   const firstChar = word[0];
@@ -116,6 +129,8 @@ const existWord = (
     for (let i = 0; i < positions.length; i++) {
       if (findPath(board, word, positions[i])) {
         return true;
+      } else {
+        removeDisabled(positions[i]);
       }
     }
   } else if (findPath(board, word, pos)) {
@@ -150,6 +165,7 @@ const checkWords = () => {
 
   for (let i = 0; i < words.length; i++) {
     console.log(words[i]);
+    this.disabledPositions = [];
     const res = checkWord(board.board2, words[i]);
     console.log(res);
   }

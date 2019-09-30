@@ -94,47 +94,39 @@ const getCharPositions = (board: string[][], char: string) => {
   return charPositions;
 };
 
-// Find Path
+// Explores every possible route to find the word
 const findPath = (
   board: string[][],
   word: string,
   pos: { x: number; y: number }
 ) => {
+  if (word.length === 1) {
+    this.disabledPositions = [];
+    return true;
+  }
   this.disabledPositions.push(pos);
   const neighbors = getNeighbors(board, pos);
   const coincidences = neighbors.filter(n => n.c === word[1]);
   let exist = false;
   for (let i = 0; i < coincidences.length && !exist; i++)
-    exist = existWord(board, word.substring(1, word.length), {
+    exist = findPath(board, word.substring(1, word.length), {
       x: coincidences[i].x,
       y: coincidences[i].y
     });
 
+  if (!exist) removeDisabled(pos);
   return exist;
 };
 
-const existWord = (
-  board: string[][],
-  word: string,
-  pos?: { x: number; y: number }
-) => {
-  if (word.length === 1) {
-    this.disabledPositions = [];
-    return true;
-  }
+// Check if the word exist in the board
+const existWord = (board: string[][], word: string) => {
   const firstChar = word[0];
   const positions = getCharPositions(board, firstChar);
 
-  if (!pos) {
-    for (let i = 0; i < positions.length; i++) {
-      if (findPath(board, word, positions[i])) {
-        return true;
-      } else {
-        removeDisabled(positions[i]);
-      }
+  for (let i = 0; i < positions.length; i++) {
+    if (findPath(board, word, positions[i])) {
+      return true;
     }
-  } else if (findPath(board, word, pos)) {
-    return true;
   }
 
   return false;
@@ -158,6 +150,15 @@ const checkWords = () => {
     "SOFT",
     "SORT",
     "START",
+    "OFATSYAROS",
+    "LFRYARO",
+    "LFSR",
+    "OSORAY",
+    "TATO",
+    "SARAR",
+    "TAFIST",
+    "RATSY",
+    "TTSYARASILOSORTF",
     "SOS",
     "TOLL",
     "TOTAL"
@@ -165,7 +166,6 @@ const checkWords = () => {
 
   for (let i = 0; i < words.length; i++) {
     console.log(words[i]);
-    this.disabledPositions = [];
     const res = checkWord(board.board2, words[i]);
     console.log(res);
   }
